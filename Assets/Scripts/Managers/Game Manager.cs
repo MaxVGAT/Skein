@@ -21,14 +21,9 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-
-        if (SceneManager.GetActiveScene().name == "MainMenu")
-        {
-            Debug.Log("isPlaying");
-            SoundManager.Instance.PlayBackgroundWhisper();
-        }
-
     }
+
+
     // Update is called once per frame
     void Update()
     {
@@ -36,9 +31,14 @@ public class GameManager : MonoBehaviour
 
     public void PlayTitleWhisper()
     {
-        if (GameManager.Instance != null) return;
+        if (GameManager.Instance == null) return;
 
-        SoundManager.Instance.PlayTitleWhisper();
+        SoundManager.Instance.PlayWakeUpSequence(SoundManager.Instance.titleWhisperSFX, 1f);
         titleButton.interactable = false;
+    }
+
+    public void CloseGame()
+    {
+        Application.Quit();
     }
 }

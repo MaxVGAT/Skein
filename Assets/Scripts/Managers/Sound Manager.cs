@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
+using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class SoundManager : MonoBehaviour
 {
@@ -7,21 +10,25 @@ public class SoundManager : MonoBehaviour
     public static SoundManager Instance { get; private set; }
 
     [Header("Audio Sources")]
+    [SerializeField] private AudioMixer masterMixer;
     [SerializeField] private AudioSource sfxSource;
     [SerializeField] private AudioSource musicSource;
+    [SerializeField] private AudioSource whisperSource;
 
     [Header("Musics")]
     [SerializeField] private AudioClip titleMusic;
+    [SerializeField] private AudioClip whisperMusic;
 
     [Header("Menu SFX")]
     [SerializeField] private AudioClip buttonPressSFX;
     [SerializeField] private AudioClip buttonCloseSFX;
-    [SerializeField] private AudioClip titleWhisperSFX;
-    [SerializeField] private AudioClip backgroundWhisperSFX;
+    [SerializeField] public AudioClip titleWhisperSFX;
 
     [Header("Sound Settings")]
     [SerializeField, Range(0f, 1f)] private float sfxVolume = 0.3f;
     [SerializeField, Range(0f, 1f)] private float musicVolume = 0.1f;
+    [SerializeField] private Slider musicSlider;
+    [SerializeField] private Slider sfxSlider;
 
     private void Awake()
     {
@@ -39,7 +46,20 @@ public class SoundManager : MonoBehaviour
         musicVolume = PlayerPrefs.GetFloat("MusicVolume", musicVolume);
         sfxVolume = PlayerPrefs.GetFloat("SFXVolume", sfxVolume);
 
-        ApplyVolumes();
+        if (musicSlider != null)
+        {
+            musicSlider.value = musicVolume; // Force the slider to match loaded volume
+            musicSlider.onValueChanged.AddListener(SetMusicVolume);
+        }
+
+        if (sfxSlider != null)
+        {
+            sfxSlider.value = sfxVolume;
+            sfxSlider.onValueChanged.AddListener(SetSFXVolume);
+        }
+
+        SetMusicVolume(musicVolume);
+        SetSFXVolume(sfxVolume);
     }
 
     private void Start()
@@ -68,6 +88,7 @@ public class SoundManager : MonoBehaviour
             //    break;
             case "MainMenu":
                 PlayMusic(titleMusic);
+                PlayWhisper(whisperMusic);
                 break;
         }
     }
@@ -90,19 +111,19 @@ public class SoundManager : MonoBehaviour
         musicSource.Play();
     }
 
+    public void PlayWhisper(AudioClip whisperClip, bool loop = true)
+    {
+        if (whisperSource.clip == whisperClip && whisperSource.isPlaying) return;
+
+        whisperSource.clip = whisperClip;
+        whisperSource.loop = loop;
+        whisperSource.volume = musicVolume;
+        whisperSource.Play();
+    }
+
     public void StopMusic()
     {
         musicSource.Stop();
-    }
-
-    private void OnDestroy()
-    {
-        // Log destruction for debugging
-        Debug.Log($"SoundManager being destroyed. Children count: {transform.childCount}");
-        foreach (Transform child in transform)
-        {
-            Debug.Log($"- Destroying child: {child.name}");
-        }
     }
 
     // Convenience methods for specific SFX
@@ -112,28 +133,39 @@ public class SoundManager : MonoBehaviour
 
     public void PlayTitleWhisper() => PlaySFX(titleWhisperSFX);
 
-    public void PlayBackgroundWhisper() => PlaySFX(backgroundWhisperSFX);
-
     // Set music volume and save preference
     public void SetMusicVolume(float volume)
     {
-        musicVolume = Mathf.Clamp01(volume);
-        musicSource.volume = musicVolume;
-        PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+        masterMixer.SetFloat("MusicVol", VolumeToDB(volume));
+        PlayerPrefs.SetFloat("MusicVolume", volume);
     }
 
-    // Set SFX volume and save preference
     public void SetSFXVolume(float volume)
     {
-        sfxVolume = Mathf.Clamp01(volume);
-        sfxSource.volume = sfxVolume;
-        PlayerPrefs.SetFloat("SFXVolume", sfxVolume);
+        masterMixer.SetFloat("SFXVol", VolumeToDB(volume));
+        PlayerPrefs.SetFloat("SFXVolume", volume);
     }
 
-    // Apply volume settings to audio sources
-    private void ApplyVolumes()
+    float VolumeToDB(float volume)
     {
-        musicSource.volume = musicVolume;
-        sfxSource.volume = sfxVolume;
+        return Mathf.Log10(Mathf.Clamp(volume, 0.0001f, 1f)) * 20f;
+    }
+
+    public void PlayWakeUpSequence(AudioClip wakeUpClip, float pauseDuration = 2f)
+    {
+        StartCoroutine(WakeUpRoutine(wakeUpClip, pauseDuration));
+    }
+
+    private IEnumerator WakeUpRoutine(AudioClip titleWhisper, float pauseDuration = 2f)
+    {
+        musicSource.Pause();
+        whisperSource.Pause();
+
+        sfxSource.PlayOneShot(titleWhisper, 1f);
+
+        yield return new WaitForSeconds(pauseDuration);
+
+        musicSource.UnPause();
+        whisperSource.UnPause();
     }
 }
