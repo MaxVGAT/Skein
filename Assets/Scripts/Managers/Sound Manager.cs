@@ -16,6 +16,8 @@ public class SoundManager : MonoBehaviour
     [Header("Menu SFX")]
     [SerializeField] private AudioClip buttonPressSFX;
     [SerializeField] private AudioClip buttonCloseSFX;
+    [SerializeField] private AudioClip titleWhisperSFX;
+    [SerializeField] private AudioClip backgroundWhisperSFX;
 
     [Header("Sound Settings")]
     [SerializeField, Range(0f, 1f)] private float sfxVolume = 0.3f;
@@ -104,15 +106,13 @@ public class SoundManager : MonoBehaviour
     }
 
     // Convenience methods for specific SFX
-    public void PlayOpenButtonSFX()
-    {
-        PlaySFX(buttonPressSFX);
-    }
+    public void PlayOpenButtonSFX() => PlaySFX(buttonPressSFX);
 
-    public void PlayCloseButtonSFX()
-    {
-        PlaySFX(buttonCloseSFX);
-    }
+    public void PlayCloseButtonSFX() => PlaySFX(buttonCloseSFX);
+
+    public void PlayTitleWhisper() => PlaySFX(titleWhisperSFX);
+
+    public void PlayBackgroundWhisper() => PlaySFX(backgroundWhisperSFX);
 
     // Set music volume and save preference
     public void SetMusicVolume(float volume)

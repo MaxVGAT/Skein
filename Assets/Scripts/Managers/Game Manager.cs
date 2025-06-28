@@ -1,18 +1,44 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    // Singleton instance for global access
+    public static GameManager Instance { get; private set; }
 
+    // Variables
+    [SerializeField] private Button titleButton;
+
+    private void Awake()
+    {
+        // Singleton pattern enforcement
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        if (SceneManager.GetActiveScene().name == "MainMenu")
+        {
+            Debug.Log("isPlaying");
+            SoundManager.Instance.PlayBackgroundWhisper();
+        }
+
+    }
     // Update is called once per frame
     void Update()
     {
-        
+    }
+
+    public void PlayTitleWhisper()
+    {
+        if (GameManager.Instance != null) return;
+
+        SoundManager.Instance.PlayTitleWhisper();
+        titleButton.interactable = false;
     }
 }
