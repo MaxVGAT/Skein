@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 public class ShowHideSettings : MonoBehaviour
 {
+
+    public static ShowHideSettings Instance { get; private set; }
+    
     // ----------------------------------------
     // REFERENCES
     // ----------------------------------------
@@ -11,6 +14,8 @@ public class ShowHideSettings : MonoBehaviour
     public CanvasGroup settingsGroup;
     public CanvasGroup creditsGroup;
     public CanvasGroup exitGroup;
+    public CanvasGroup startGroup;
+    public CanvasGroup secretGroup;
     public float fadeTime = 0.3f;
 
     [Header("Volume")]
@@ -19,6 +24,19 @@ public class ShowHideSettings : MonoBehaviour
     // ----------------------------------------
     // UNITY EVENTS
     // ----------------------------------------
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
     private void Start()
     {
         // Initialize settings, credits, bugs panels as hidden and non-interactable
@@ -41,6 +59,20 @@ public class ShowHideSettings : MonoBehaviour
             exitGroup.alpha = 0;
             exitGroup.interactable = false;
             exitGroup.blocksRaycasts = false;
+        }
+
+        if (startGroup != null)
+        {
+            startGroup.alpha = 0;
+            startGroup.interactable = false;
+            startGroup.blocksRaycasts = false;
+        }
+
+        if(secretGroup != null)
+        {
+            secretGroup.alpha = 0;
+            secretGroup.interactable = false;
+            secretGroup.blocksRaycasts = false;
         }
     }
 
@@ -99,7 +131,7 @@ public class ShowHideSettings : MonoBehaviour
     {
         if (exitGroup == null || mainMenuGroup == null) return;
 
-        // Show bugs panel, disable main menu interaction
+        // Show exit panel, disable main menu interaction
         exitGroup.alpha = 1;
         exitGroup.interactable = true;
         exitGroup.blocksRaycasts = true;
@@ -111,10 +143,57 @@ public class ShowHideSettings : MonoBehaviour
     {
         if (exitGroup == null || mainMenuGroup == null) return;
 
-        // Hide bugs panel, re-enable main menu interaction
+        // Hide exit panel, re-enable main menu interaction
         exitGroup.alpha = 0;
         exitGroup.interactable = false;
         exitGroup.blocksRaycasts = false;
+
+        mainMenuGroup.interactable = true;
+    }
+
+    public void ShowStart()
+    {
+        if (startGroup == null || mainMenuGroup == null) return;
+
+        // Show start panel, disable main menu interaction
+        startGroup.alpha = 1;
+        startGroup.interactable = true;
+        startGroup.blocksRaycasts = true;
+
+        mainMenuGroup.interactable = false;
+    }
+
+    public void HideStart()
+    {
+        if (startGroup == null || mainMenuGroup == null) return;
+
+        // Hide start
+        // panel, re-enable main menu interaction
+        startGroup.alpha = 0;
+        startGroup.interactable = false;
+        startGroup.blocksRaycasts = false;
+
+        mainMenuGroup.interactable = true;
+    }
+
+    public void ShowSecret()
+    {
+        if (secretGroup == null || mainMenuGroup == null) return;
+
+        secretGroup.alpha = 1;
+        secretGroup.interactable = true;
+        secretGroup.blocksRaycasts = true;
+
+        mainMenuGroup.interactable = false;
+    }
+
+    public void HideSecret()
+    {
+        if (secretGroup == null || mainMenuGroup == null) return;
+
+        secretGroup.alpha = 0;
+        secretGroup.interactable = false;
+        secretGroup.blocksRaycasts = false;
 
         mainMenuGroup.interactable = true;
     }
@@ -145,4 +224,23 @@ public class ShowHideSettings : MonoBehaviour
         // Load saved volume or default to 1
         volumeSlider.value = PlayerPrefs.GetFloat("soundVolume", 1f);
     }
+
+    // ----------------------------------------
+    // VIDEO SETTINGS
+    // ----------------------------------------
+
+    //public void ToggleFS()
+    //{
+    //    if(Screen.fullScreen)
+    //    {
+    //        Screen.SetResolution(1024, 768, false);
+    //        SoundManager.Instance.PlayToggleOFFSFX();
+    //    }
+    //    else
+    //    {
+    //        Resolution currentRes = Screen.currentResolution;
+    //        Screen.SetResolution(currentRes.width, currentRes.height, true);
+    //        SoundManager.Instance.PlayToggleONSFX();
+    //    }
+    //}
 }

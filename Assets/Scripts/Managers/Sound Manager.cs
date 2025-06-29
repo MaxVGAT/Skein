@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.Audio;
+using Unity.VisualScripting;
 
 public class SoundManager : MonoBehaviour
 {
@@ -23,12 +24,17 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private AudioClip buttonPressSFX;
     [SerializeField] private AudioClip buttonCloseSFX;
     [SerializeField] public AudioClip titleWhisperSFX;
+    [SerializeField] private AudioClip ToggleONSFX;
+    [SerializeField] private AudioClip ToggleOFFSFX;
 
     [Header("Sound Settings")]
     [SerializeField, Range(0f, 1f)] private float sfxVolume = 0.3f;
     [SerializeField, Range(0f, 1f)] private float musicVolume = 0.1f;
     [SerializeField] private Slider musicSlider;
     [SerializeField] private Slider sfxSlider;
+    private bool isMuted;
+
+
 
     private void Awake()
     {
@@ -57,6 +63,8 @@ public class SoundManager : MonoBehaviour
             sfxSlider.value = sfxVolume;
             sfxSlider.onValueChanged.AddListener(SetSFXVolume);
         }
+
+        isMuted = PlayerPrefs.GetInt("IsMuted", 0) == 1;
 
         SetMusicVolume(musicVolume);
         SetSFXVolume(sfxVolume);
@@ -121,17 +129,16 @@ public class SoundManager : MonoBehaviour
         whisperSource.Play();
     }
 
-    public void StopMusic()
-    {
-        musicSource.Stop();
-    }
-
     // Convenience methods for specific SFX
     public void PlayOpenButtonSFX() => PlaySFX(buttonPressSFX);
 
     public void PlayCloseButtonSFX() => PlaySFX(buttonCloseSFX);
 
     public void PlayTitleWhisper() => PlaySFX(titleWhisperSFX);
+
+    public void PlayToggleONSFX() => PlaySFX(ToggleONSFX);
+
+    public void PlayToggleOFFSFX() => PlaySFX(ToggleOFFSFX);
 
     // Set music volume and save preference
     public void SetMusicVolume(float volume)
@@ -143,7 +150,7 @@ public class SoundManager : MonoBehaviour
     public void SetSFXVolume(float volume)
     {
         masterMixer.SetFloat("SFXVol", VolumeToDB(volume));
-        PlayerPrefs.SetFloat("SFXVolume", volume);
+        PlayerPrefs.SetFloat("SFXVolume", volume);  
     }
 
     float VolumeToDB(float volume)
@@ -164,6 +171,8 @@ public class SoundManager : MonoBehaviour
         sfxSource.PlayOneShot(titleWhisper, 1f);
 
         yield return new WaitForSeconds(pauseDuration);
+
+        ShowHideSettings.Instance.ShowSecret();
 
         musicSource.UnPause();
         whisperSource.UnPause();

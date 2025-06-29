@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
     // Variables
     [SerializeField] private Button titleButton;
 
+    public Texture2D customCursor;
+    public Vector2 hotspot = Vector2.zero;
+
     private void Awake()
     {
         // Singleton pattern enforcement
@@ -23,6 +26,10 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start()
+    {
+        Cursor.SetCursor(customCursor, hotspot, CursorMode.Auto);
+    }
 
     // Update is called once per frame
     void Update()
