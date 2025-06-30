@@ -5,13 +5,26 @@ using UnityEngine.Video;
 
 public class PlayVideoTitle : MonoBehaviour
 {
-    [SerializeField] private VideoPlayer videoPlayer;
+    [SerializeField] private string videoUrl = "https://maxvgat.github.io/VideoHost/titleVideo.mp4";
+    private VideoPlayer videoPlayer;
 
-    private void Start()
+    private void Awake()
     {
-        string videoPath = Application.streamingAssetsPath + "/titleVideo.mp4";
-        videoPlayer.url = videoPath;
+        videoPlayer = GetComponent<VideoPlayer>();
+        if (videoPlayer)
+        {
+            videoPlayer.url = videoUrl;
+            videoPlayer.playOnAwake = false;
+            videoPlayer.Prepare();
+
+            videoPlayer.prepareCompleted += OnVideoPrepared;
+        }
+    }
+
+    private void OnVideoPrepared(VideoPlayer player)
+    {
         videoPlayer.Play();
     }
-    
+
+
 }
